@@ -1,8 +1,10 @@
 FROM eclipse-temurin:25-jdk-alpine AS java-builder
 RUN apk add --no-cache git
 WORKDIR /build
-RUN git clone --depth 1 https://github.com regular && \
-    git clone --depth 1 https://github.com simples && \
+ENV HOST=github.com
+ENV ORG=ReceitaFederal
+RUN git clone --depth 1 https://${HOST}/${ORG}/calculadora-regime-geral.git regular && \
+    git clone --depth 1 https://${HOST}/${ORG}/calculadora-simples-nacional.git simples && \
     cp -r regular/flyway simples/
 RUN cd regular && chmod +x mvnw && mkdir -p ../calculadora/db && ./mvnw flyway:migrate -Dflyway.configFiles=./flyway/flyway-pro.conf --batch-mode && ./mvnw clean package -DskipTests
 RUN cd simples && chmod +x mvnw && mkdir -p ../calculadora/db && ./mvnw flyway:migrate -Dflyway.configFiles=./flyway/flyway-pro.conf --batch-mode && ./mvnw clean package -DskipTests
@@ -10,7 +12,9 @@ RUN cd simples && chmod +x mvnw && mkdir -p ../calculadora/db && ./mvnw flyway:m
 FROM golang:alpine AS go-builder
 RUN apk add --no-cache git
 WORKDIR /build
-RUN git clone --depth 1 https://github.com . && go build -o danfse-service ./cmd/danfse
+ENV HOST=github.com
+ENV ORG=ReceitaFederal
+RUN git clone --depth 1 https://${HOST}/${ORG}/danfse.git . && go build -o danfse-service ./cmd/danfse
 
 FROM eclipse-temurin:25-jre-alpine
 RUN apk add --no-cache python3 py3-pip bash
