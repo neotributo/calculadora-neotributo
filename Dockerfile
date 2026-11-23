@@ -4,12 +4,14 @@ WORKDIR /build
 RUN git clone --depth 1 https://github.com regular && \
     git clone --depth 1 https://github.com simples && \
     cp -r regular/flyway simples/
-RUN cd regular && chmod +x mvnw && mkdir -p ./calculadora/db && ./mvnw flyway:migrate -Dflyway.configFiles=./flyway/flyway-pro.conf --batch-mode && ./mvnw clean package -DskipTests
-RUN cd simples && chmod +x mvnw && mkdir -p ./calculadora/db && ./mvnw flyway:migrate -Dflyway.configFiles=./flyway/flyway-pro.conf --batch-mode && ./mvnw clean package -DskipTests
+RUN cd regular && chmod +x mvnw && mkdir -p ../calculadora/db && ./mvnw flyway:migrate -Dflyway.configFiles=./flyway/flyway-pro.conf --batch-mode && ./mvnw clean package -DskipTests
+RUN cd simples && chmod +x mvnw && mkdir -p ../calculadora/db && ./mvnw flyway:migrate -Dflyway.configFiles=./flyway/flyway-pro.conf --batch-mode && ./mvnw clean package -DskipTests
+
 FROM golang:alpine AS go-builder
 RUN apk add --no-cache git
 WORKDIR /build
 RUN git clone --depth 1 https://github.com . && go build -o danfse-service ./cmd/danfse
+
 FROM eclipse-temurin:25-jre-alpine
 RUN apk add --no-cache python3 py3-pip bash
 WORKDIR /app
