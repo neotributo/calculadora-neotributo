@@ -5,36 +5,152 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calculadora Reforma Tributária (CBS / IBS / IS) | NEOTRIBUTO</title>
   <style>
-    :root { --navy: #0A192F; --slate: #112240; --accent: #2563EB; --accent-hover: #1D4ED8; --bg: #F8FAFC; --text: #1E293B; --border: #E2E8F0; }
+    :root {
+      --navy: #0A192F;
+      --slate: #112240;
+      --neo-green: #14B8A6;
+      --neo-green-light: #2DD4BF;
+      --neo-green-dark: #0D9488;
+      --neo-green-text: #042F2E;
+      --accent-blue: #1D4ED8;
+      --bg: #F8FAFC;
+      --text: #1E293B;
+      --border: #E2E8F0;
+    }
     * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
     body { margin: 0; background: var(--bg); color: var(--text); }
-    header { background: var(--navy); color: #fff; padding: 1.3rem 2rem; border-bottom: 3px solid var(--accent); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    header {
+      background: linear-gradient(90deg, #071120 0%, var(--navy) 65%, #0F293A 100%);
+      color: #fff;
+      padding: 1.3rem 2rem;
+      border-bottom: 3px solid var(--neo-green);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
     .brand-group { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; }
     .brand-logo { height: 34px; width: auto; display: block; }
     .brand-divider { width: 1px; height: 32px; background: #334155; }
     .brand-title h1 { margin: 0; font-size: 1.2rem; font-weight: 600; color: #F8FAFC; letter-spacing: 0.3px; }
+    .brand-title h1 span { color: var(--neo-green-light); }
     .brand-title small { color: #94A3B8; font-size: 0.82rem; display: block; margin-top: 2px; }
-    .badge { background: rgba(37, 99, 235, 0.2); border: 1px solid #60A5FA; color: #DBEAFE; padding: 0.35rem 0.9rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+    .badge {
+      background: rgba(20, 184, 166, 0.16);
+      border: 1px solid var(--neo-green);
+      color: #99F6E4;
+      padding: 0.38rem 0.95rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
     .container { max-width: 1080px; margin: 2rem auto; padding: 0 1rem; }
     .tabs { display: flex; gap: 0.6rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-    .tab-btn { background: #fff; border: 1px solid var(--border); padding: 0.85rem 1.4rem; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--slate); transition: 0.2s; }
-    .tab-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); border-bottom: 3px solid var(--accent); }
-    .card { background: #fff; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 20px rgba(10, 25, 47, 0.06); border: 1px solid var(--border); }
-    .card h2 { margin-top: 0; color: var(--navy); font-size: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 0.8rem; }
+    .tab-btn {
+      background: #fff;
+      border: 1px solid var(--border);
+      padding: 0.85rem 1.4rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--slate);
+      transition: 0.2s;
+    }
+    .tab-btn:hover { border-color: var(--neo-green); }
+    .tab-btn.active {
+      background: var(--navy);
+      color: #fff;
+      border-color: var(--navy);
+      border-bottom: 3px solid var(--neo-green);
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(10, 25, 47, 0.06);
+      border: 1px solid var(--border);
+    }
+    .card h2 {
+      margin-top: 0;
+      color: var(--navy);
+      font-size: 1.25rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.8rem;
+    }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.2rem; margin: 1.5rem 0; }
     label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--slate); }
-    input, textarea { width: 100%; padding: 0.75rem; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 0.95rem; }
-    .btn-primary { background: var(--accent); color: #fff; border: none; padding: 0.9rem 1.8rem; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; }
-    .btn-primary:hover { background: var(--accent-hover); }
-    .result-box { margin-top: 2rem; background: var(--navy); color: #fff; padding: 1.8rem; border-radius: 10px; display: none; }
-    .result-box h3 { margin-top: 0; color: #93C5FD; font-size: 1.1rem; }
+    input, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus { outline: none; border-color: var(--neo-green); box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--neo-green-light) 0%, var(--neo-green) 100%);
+      color: var(--neo-green-text);
+      border: none;
+      padding: 0.9rem 1.9rem;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.98rem;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(20, 184, 166, 0.28);
+      transition: 0.2s;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #5EEAD4 0%, var(--neo-green-dark) 100%);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+    .result-box {
+      margin-top: 2rem;
+      background: var(--navy);
+      color: #fff;
+      padding: 1.8rem;
+      border-radius: 10px;
+      border-top: 3px solid var(--neo-green);
+      display: none;
+    }
+    .result-box h3 { margin-top: 0; color: var(--neo-green-light); font-size: 1.1rem; }
     .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.2rem 0; }
-    .kpi-card { background: var(--slate); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--accent); }
+    .kpi-card {
+      background: var(--slate);
+      padding: 1rem;
+      border-radius: 8px;
+      border-left: 3px solid var(--neo-green);
+    }
     .kpi-card small { color: #94A3B8; font-size: 0.8rem; display: block; }
     .kpi-card strong { font-size: 1.25rem; color: #fff; margin-top: 0.3rem; display: block; }
     pre { background: #061020; padding: 1rem; border-radius: 6px; overflow-x: auto; color: #CBD5E1; font-size: 0.82rem; margin-top: 0.6rem; }
-    .cta-banner { margin-top: 1.5rem; padding: 1.3rem; background: var(--slate); border: 1px solid #334155; border-left: 4px solid #60A5FA; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-    .cta-banner a { background: var(--accent); color: #fff; text-decoration: none; padding: 0.7rem 1.3rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem; }
+    .cta-banner {
+      margin-top: 1.5rem;
+      padding: 1.3rem;
+      background: linear-gradient(90deg, var(--slate) 0%, #0F293A 100%);
+      border: 1px solid rgba(20, 184, 166, 0.35);
+      border-left: 4px solid var(--neo-green);
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .cta-banner strong span { color: var(--neo-green-light); }
+    .cta-banner a {
+      background: linear-gradient(135deg, var(--neo-green-light) 0%, var(--neo-green) 100%);
+      color: var(--neo-green-text);
+      text-decoration: none;
+      padding: 0.72rem 1.35rem;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .cta-banner a:hover { background: var(--neo-green-dark); color: #fff; }
     @media (max-width: 640px) { .brand-divider { display: none; } }
   </style>
 </head>
@@ -44,7 +160,7 @@
     <img src="logo-neotributo.png" alt="NEOTRIBUTO" class="brand-logo">
     <div class="brand-divider"></div>
     <div class="brand-title">
-      <h1>Calculadora da Reforma Tributária</h1>
+      <h1>Calculadora da <span>Reforma Tributária</span></h1>
       <small>Motor Oficial Receita Federal (LC 214/2025 — CBS, IBS e Imposto Seletivo)</small>
     </div>
   </div>
@@ -71,9 +187,9 @@
     <div id="res-regular" class="result-box">
       <h3>Demonstrativo Oficial da Operação</h3>
       <div class="kpi-grid" id="kpi-regular"></div>
-      <details><summary style="cursor:pointer;color:#93C5FD;">Ver retorno técnico completo (JSON Receita Federal)</summary><pre id="json-regular"></pre></details>
+      <details><summary style="cursor:pointer;color:#2DD4BF;">Ver retorno técnico completo (JSON Receita Federal)</summary><pre id="json-regular"></pre></details>
       <div class="cta-banner">
-        <div><strong>Sua empresa pode preservar até 20% do caixa destinado a tributos federais.</strong><br><small style="color:#CBD5E1;">Solicite uma análise individual e sem compromisso com os especialistas da NEOTRIBUTO.</small></div>
+        <div><strong>Sua empresa pode <span>preservar até 20% do caixa</span> destinado a tributos federais.</strong><br><small style="color:#CBD5E1;">Solicite uma análise individual e sem compromisso com os especialistas da NEOTRIBUTO.</small></div>
         <a href="https://neotributo.com.br" target="_blank">Agendar Análise Gratuita</a>
       </div>
     </div>
@@ -107,42 +223,3 @@
     document.getElementById('aba-' + nome).style.display = 'block';
     document.getElementById('btn-' + nome).classList.add('active');
   }
-  function formatBRL(val) {
-    return Number(val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  }
-  async function simularRegimeGeral() {
-    var box = document.getElementById('res-regular');
-    var kpi = document.getElementById('kpi-regular');
-    var out = document.getElementById('json-regular');
-    box.style.display = 'block';
-    kpi.innerHTML = '<div class="kpi-card"><small>Status</small><strong>Calculando...</strong></div>';
-    var valorOp = Number(document.getElementById('reg-valor').value);
-    var payload = {
-      id: "SIM-NEOTRIBUTO-01",
-      versao: "1.0.0",
-      dataHoraEmissao: document.getElementById('reg-data').value + "T10:00:00-03:00",
-      municipio: Number(document.getElementById('reg-municipio').value),
-      uf: document.getElementById('reg-uf').value.toUpperCase(),
-      itens: [{
-        numero: 1,
-        ncm: document.getElementById('reg-ncm').value,
-        cst: document.getElementById('reg-cst').value,
-        cClassTrib: document.getElementById('reg-cclasstrib').value,
-        baseCalculo: valorOp,
-        quantidade: 1,
-        unidade: "UN"
-      }]
-    };
-    try {
-      var resp = await fetch("/api/calcular/regime-geral", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      var data = await resp.json();
-      out.textContent = JSON.stringify(data, null, 2);
-      var tot = (data && data.total) ? data.total : ((data && data.resultado && data.resultado.total) ? data.resultado.total : {});
-      var vCBS = tot.vCBS || 0;
-      var vIBS = (tot.vIBSUF || 0) + (tot.vIBSMun || 0);
-      var vIS = tot.vIS || 0;
-      kpi.innerHTML =
