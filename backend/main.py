@@ -24,7 +24,8 @@ async def listar_municipios(uf: str):
     sigla = uf.strip().upper()[:2]
     if sigla in CACHE_MUNICIPIOS:
         return JSONResponse(CACHE_MUNICIPIOS[sigla])
-        url = f"https://ibge.gov.br{sigla}/municipios?orderBy=nome"
+    base_ibge = "https://servicodados." + "ibge.gov.br/api/v1/localidades/estados/"
+    url = f"{base_ibge}{sigla}/municipios?orderBy=nome"
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     with urllib.request.urlopen(req, timeout=10) as resp:
         dados = json.loads(resp.read().decode("utf-8"))
