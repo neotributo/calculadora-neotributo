@@ -40,7 +40,7 @@ async def calc_regular(request: Request):
     payload = await request.json()
     data_str = str(payload.get("dataHoraEmissao", "2027-01-15"))
     ano = int(data_str[:4]) if data_str[:4].isdigit() else 2027
-    aliq = ALIQUOTAS_ANO.get(ano, ALIQUOTAS_ANO[2033] if ano > 2033 else ALIQUOTAS_ANO[2026])
+    aliq = ALIQUOTAS_ANO.get(ano, ALIQUOTAS_ANO[2033])
 
     tot_cbs = tot_ibs_uf = tot_ibs_mun = tot_is = 0.0
     itens_calc = []
