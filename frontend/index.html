@@ -12,7 +12,6 @@
       --neo-green-light: #2DD4BF;
       --neo-green-dark: #0D9488;
       --neo-green-text: #042F2E;
-      --accent-blue: #1D4ED8;
       --bg: #F8FAFC;
       --text: #1E293B;
       --border: #E2E8F0;
@@ -80,15 +79,16 @@
     }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.2rem; margin: 1.5rem 0; }
     label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--slate); }
-    input, textarea {
+    input, select, textarea {
       width: 100%;
       padding: 0.75rem;
       border: 1px solid #CBD5E1;
       border-radius: 6px;
       font-size: 0.95rem;
+      background: #fff;
       transition: border-color 0.2s;
     }
-    input:focus, textarea:focus { outline: none; border-color: var(--neo-green); box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15); }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--neo-green); box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15); }
     .btn-primary {
       background: linear-gradient(135deg, var(--neo-green-light) 0%, var(--neo-green) 100%);
       color: var(--neo-green-text);
@@ -117,16 +117,15 @@
       display: none;
     }
     .result-box h3 { margin-top: 0; color: var(--neo-green-light); font-size: 1.1rem; }
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.2rem 0; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1.2rem 0; }
     .kpi-card {
       background: var(--slate);
-      padding: 1rem;
+      padding: 1.1rem;
       border-radius: 8px;
       border-left: 3px solid var(--neo-green);
     }
     .kpi-card small { color: #94A3B8; font-size: 0.8rem; display: block; }
-    .kpi-card strong { font-size: 1.25rem; color: #fff; margin-top: 0.3rem; display: block; }
-    pre { background: #061020; padding: 1rem; border-radius: 6px; overflow-x: auto; color: #CBD5E1; font-size: 0.82rem; margin-top: 0.6rem; }
+    .kpi-card strong { font-size: 1.3rem; color: #fff; margin-top: 0.35rem; display: block; }
     .cta-banner {
       margin-top: 1.5rem;
       padding: 1.3rem;
@@ -161,10 +160,10 @@
     <div class="brand-divider"></div>
     <div class="brand-title">
       <h1>Calculadora da <span>Reforma Tributária</span></h1>
-      <small>Motor Oficial Receita Federal (LC 214/2025 — CBS, IBS e Imposto Seletivo)</small>
+      <small>Regras Oficiais LC 214/2025 — CBS, IBS e Imposto Seletivo</small>
     </div>
   </div>
-  <span class="badge">Ambiente Oficial RFB</span>
+  <span class="badge">LC 214/2025 Atualizada</span>
 </header>
 <div class="container">
   <div class="tabs">
@@ -172,6 +171,7 @@
     <button type="button" id="btn-simples" class="tab-btn" onclick="abrirAba('simples')">2. Simples Nacional</button>
     <button type="button" id="btn-danfse" class="tab-btn" onclick="abrirAba('danfse')">3. Gerador DANFSe (XML → PDF)</button>
   </div>
+
   <div id="aba-regular" class="card">
     <h2>Simulação Regime Geral (CBS / IBS / IS)</h2>
     <div class="grid">
@@ -179,21 +179,29 @@
       <div><label>Município IBGE (Vitória/ES = 3205309)</label><input type="number" id="reg-municipio" value="3205309"></div>
       <div><label>UF Destino</label><input type="text" id="reg-uf" value="ES" maxlength="2"></div>
       <div><label>NCM do Produto / Serviço</label><input type="text" id="reg-ncm" value="84713012"></div>
-      <div><label>CST (CBS/IBS)</label><input type="text" id="reg-cst" value="000"></div>
+      <div>
+        <label>CST / Benefício (LC 214/2025)</label>
+        <select id="reg-cst">
+          <option value="000">000 — Tributação Integral (Alíquota Padrão)</option>
+          <option value="200">200 — Redução de 60% (Saúde, Educação, Agro, Cultura)</option>
+          <option value="210">210 — Redução de 30% (Profissões Regulamentadas)</option>
+          <option value="400">400 — Isenção / Cesta Básica Nacional (Alíquota Zero)</option>
+        </select>
+      </div>
       <div><label>Classificação Tributária (cClassTrib)</label><input type="text" id="reg-cclasstrib" value="000001"></div>
-      <div><label>Valor da Operação (R$)</label><input type="number" id="reg-valor" value="10000.00" step="0.01"></div>
+      <div><label>Valor da Operação (R$)</label><input type="number" id="reg-valor" value="100000.00" step="0.01"></div>
     </div>
     <button type="button" class="btn-primary" onclick="simularRegimeGeral()">Calcular Tributos (CBS / IBS / IS)</button>
     <div id="res-regular" class="result-box">
-      <h3>Demonstrativo Oficial da Operação</h3>
+      <h3>Demonstrativo da Operação — Regime Regular</h3>
       <div class="kpi-grid" id="kpi-regular"></div>
-      <details><summary style="cursor:pointer;color:#2DD4BF;">Ver retorno técnico completo (JSON Receita Federal)</summary><pre id="json-regular"></pre></details>
       <div class="cta-banner">
         <div><strong>Sua empresa pode <span>preservar até 20% do caixa</span> destinado a tributos federais.</strong><br><small style="color:#CBD5E1;">Solicite uma análise individual e sem compromisso com os especialistas da NEOTRIBUTO.</small></div>
         <a href="https://neotributo.com.br" target="_blank">Agendar Análise Gratuita</a>
       </div>
     </div>
   </div>
+
   <div id="aba-simples" class="card" style="display:none;">
     <h2>Simulação Simples Nacional (CBS / IBS)</h2>
     <div class="grid">
@@ -203,112 +211,23 @@
       <div><label>Valor da Operação (R$)</label><input type="number" id="sn-valor" value="5000.00" step="0.01"></div>
     </div>
     <button type="button" class="btn-primary" onclick="simularSimples()">Calcular Simples Nacional</button>
-    <div id="res-simples" class="result-box"><h3>Retorno Motor Simples Nacional</h3><pre id="json-simples"></pre></div>
+    <div id="res-simples" class="result-box">
+      <h3>Demonstrativo da Operação — Simples Nacional (DAS)</h3>
+      <div class="kpi-grid" id="kpi-simples"></div>
+      <div class="cta-banner">
+        <div><strong>Avalie se o recolhimento por fora do DAS gera <span>mais créditos para seus clientes B2B</span>.</strong><br><small style="color:#CBD5E1;">Simule o melhor enquadramento com os consultores da NEOTRIBUTO.</small></div>
+        <a href="https://neotributo.com.br" target="_blank">Agendar Análise Gratuita</a>
+      </div>
+    </div>
   </div>
+
   <div id="aba-danfse" class="card" style="display:none;">
-    <h2>Gerador Oficial de DANFSe em PDF</h2>
+    <h2>Gerador de DANFSe em PDF</h2>
     <label>Cole o conteúdo XML da NFS-e abaixo:</label>
     <textarea id="danfse-xml" rows="8" placeholder="<NFSe>...</NFSe>"></textarea><br><br>
     <button type="button" class="btn-primary" onclick="gerarDanfsePDF()">Gerar e Baixar PDF</button>
   </div>
 </div>
+
 <script>
   function abrirAba(nome) {
-    document.getElementById('aba-regular').style.display = 'none';
-    document.getElementById('aba-simples').style.display = 'none';
-    document.getElementById('aba-danfse').style.display = 'none';
-    document.getElementById('btn-regular').classList.remove('active');
-    document.getElementById('btn-simples').classList.remove('active');
-    document.getElementById('btn-danfse').classList.remove('active');
-    document.getElementById('aba-' + nome).style.display = 'block';
-    document.getElementById('btn-' + nome).classList.add('active');
-  }
-  function formatBRL(val) {
-    return Number(val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  }
-  async function simularRegimeGeral() {
-    var box = document.getElementById('res-regular');
-    var kpi = document.getElementById('kpi-regular');
-    var out = document.getElementById('json-regular');
-    box.style.display = 'block';
-    kpi.innerHTML = '<div class="kpi-card"><small>Status</small><strong>Calculando...</strong></div>';
-    var valorOp = Number(document.getElementById('reg-valor').value);
-    var payload = {
-      id: "SIM-NEOTRIBUTO-01",
-      versao: "1.0.0",
-      dataHoraEmissao: document.getElementById('reg-data').value + "T10:00:00-03:00",
-      municipio: Number(document.getElementById('reg-municipio').value),
-      uf: document.getElementById('reg-uf').value.toUpperCase(),
-      itens: [{
-        numero: 1,
-        ncm: document.getElementById('reg-ncm').value,
-        cst: document.getElementById('reg-cst').value,
-        cClassTrib: document.getElementById('reg-cclasstrib').value,
-        baseCalculo: valorOp,
-        quantidade: 1,
-        unidade: "UN"
-      }]
-    };
-    try {
-      var resp = await fetch("/api/calcular/regime-geral", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      var data = await resp.json();
-      out.textContent = JSON.stringify(data, null, 2);
-      var tot = (data && data.total) ? data.total : {};
-      var vCBS = tot.vCBS || 0;
-      var vIBS = (tot.vIBSUF || 0) + (tot.vIBSMun || 0);
-      var vIS = tot.vIS || 0;
-      kpi.innerHTML =
-        '<div class="kpi-card"><small>Base de Cálculo</small><strong>' + formatBRL(valorOp) + '</strong></div>' +
-        '<div class="kpi-card"><small>CBS (Federal)</small><strong>' + formatBRL(vCBS) + '</strong></div>' +
-        '<div class="kpi-card"><small>IBS (Estadual + Municipal)</small><strong>' + formatBRL(vIBS) + '</strong></div>' +
-        '<div class="kpi-card"><small>Imposto Seletivo (IS)</small><strong>' + formatBRL(vIS) + '</strong></div>';
-    } catch (err) {
-      kpi.innerHTML = '';
-      out.textContent = "Erro ao calcular: " + err.message;
-    }
-  }
-  async function simularSimples() {
-    var out = document.getElementById('json-simples');
-    document.getElementById('res-simples').style.display = 'block';
-    var payload = {
-      dataHoraEmissao: document.getElementById('sn-data').value + "T10:00:00-03:00",
-      municipio: Number(document.getElementById('sn-municipio').value),
-      uf: document.getElementById('sn-uf').value.toUpperCase(),
-      itens: [{ numero: 1, valor: Number(document.getElementById('sn-valor').value) }]
-    };
-    try {
-      var resp = await fetch("/api/calcular/simples-nacional", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      out.textContent = JSON.stringify(await resp.json(), null, 2);
-    } catch (err) {
-      out.textContent = "Erro ao calcular: " + err.message;
-    }
-  }
-  async function gerarDanfsePDF() {
-    var xml = document.getElementById('danfse-xml').value.trim();
-    if (!xml) { alert("Cole um XML válido."); return; }
-    try {
-      var resp = await fetch("/api/gerar/danfse", {
-        method: "POST",
-        headers: { "Content-Type": "application/xml" },
-        body: xml
-      });
-      if (!resp.ok) throw new Error("Status " + resp.status);
-      var link = document.createElement('a');
-      link.href = URL.createObjectURL(await resp.blob());
-      link.download = "DANFSe-NEOTRIBUTO.pdf";
-      link.click();
-    } catch (err) {
-      alert("Erro ao gerar PDF: " + err.message);
-    }
-  }
-</script>
-</body>
-</html>
