@@ -196,8 +196,8 @@
     <h2>Simulação Regime Geral (CBS / IBS / IS)</h2>
     <div class="grid">
       <div><label>Data do Fato Gerador</label><input type="date" id="reg-data" value="2027-01-15"></div>
-      <div><label>Município IBGE (Vitória/ES = 3205309)</label><input type="number" id="reg-municipio" value="3205309"></div>
-      <div><label>UF Destino</label><input type="text" id="reg-uf" value="ES" maxlength="2"></div>
+      <div><label>UF Destino</label><select id="reg-uf" onchange="carregarCidades('reg-uf', 'reg-municipio')"></select></div>
+      <div><label>Município / Cidade</label><select id="reg-municipio"><option value="3205309">Vitória</option></select></div>
       <div><label>NCM do Produto / Serviço</label><input type="text" id="reg-ncm" value="84713012"></div>
       <div>
         <label>CST / Benefício (LC 214/2025)</label>
@@ -231,7 +231,7 @@
         <select id="sn-anexo">
           <option value="I">Anexo I — Comércio</option>
           <option value="II">Anexo II — Indústria</option>
-          <option value="III" selected>Anexo III — Serviços (Receitas de Locação, Manutenção, etc.)</option>
+          <option value="III" selected>Anexo III — Serviços (Locação, Manutenção, etc.)</option>
           <option value="IV">Anexo IV — Serviços (Construção, Vigilância, Limpeza, etc.)</option>
           <option value="V">Anexo V — Serviços (Consultoria, TI, Engenharia, etc.)</option>
         </select>
@@ -246,8 +246,8 @@
           <option value="faixa5">5ª Faixa — De R$ 1.800.000,01 a R$ 3.600.000,00</option>
         </select>
       </div>
-      <div><label>Município IBGE</label><input type="number" id="sn-municipio" value="3205309"></div>
-      <div><label>UF</label><input type="text" id="sn-uf" value="ES" maxlength="2"></div>
+      <div><label>UF</label><select id="sn-uf" onchange="carregarCidades('sn-uf', 'sn-municipio')"></select></div>
+      <div><label>Município / Cidade</label><select id="sn-municipio"><option value="3205309">Vitória</option></select></div>
       <div><label>Valor da Operação (R$)</label><input type="number" id="sn-valor" value="50000.00" step="0.01"></div>
     </div>
     <button type="button" class="btn-primary" onclick="simularSimples()">Calcular Simples Nacional</button>
@@ -261,6 +261,7 @@
     </div>
   </div>
 
+  <!-- ABA 3: GERADOR DANFSE -->
   <div id="aba-danfse" class="card" style="display:none;">
     <h2>Gerador de DANFSe em PDF (Padrão Nacional)</h2>
     <div class="section-box">
@@ -277,7 +278,8 @@
         <div><label>CNPJ do Prestador</label><input type="text" id="df-prest-doc" placeholder="00.000.000/0001-00"></div>
         <div><label>Razão Social / Nome do Tomador</label><input type="text" id="df-tom-nome" placeholder="Ex: CLIENTE EXEMPLO S/A"></div>
         <div><label>CNPJ / CPF do Tomador</label><input type="text" id="df-tom-doc" placeholder="00.000.000/0001-91"></div>
-        <div><label>Município / UF</label><input type="text" id="df-mun" value="Vitória - ES (3205309)"></div>
+        <div><label>UF</label><select id="df-uf" onchange="carregarCidades('df-uf', 'df-mun')"></select></div>
+        <div><label>Município / Cidade</label><select id="df-mun"><option value="3205309">Vitória</option></select></div>
         <div><label>Valor do Serviço (R$)</label><input type="number" id="df-valor" value="15000.00" step="0.01"></div>
       </div>
       <div><label>Discriminação do Serviço</label><input type="text" id="df-desc" value="Consultoria tributaria e planejamento fiscal - Reforma Tributaria (LC 214/2025)"></div><br>
@@ -292,17 +294,52 @@
     </details>
   </div>
 </div>
-
 <script>
+  const ESTADOS_BR = [
+    ["AC","Acre"],["AL","Alagoas"],["AP","Amapá"],["AM","Amazonas"],["BA","Bahia"],["CE","Ceará"],
+    ["DF","Distrito Federal"],["ES","Espírito Santo"],["GO","Goiás"],["MA","Maranhão"],["MT","Mato Grosso"],
+    ["MS","Mato Grosso do Sul"],["MG","Minas Gerais"],["PA","Pará"],["PB","Paraíba"],["PR","Paraná"],
+    ["PE","Pernambuco"],["PI","Piauí"],["RJ","Rio de Janeiro"],["RN","Rio Grande do Norte"],
+    ["RS","Rio Grande do Sul"],["RO","Rondônia"],["RR","Roraima"],["SC","Santa Catarina"],
+    ["SP","São Paulo"],["SE","Sergipe"],["TO","Tocantins"]
+  ];
+
+  function preencherUFs() {
+    ['reg-uf', 'sn-uf', 'df-uf'].forEach(function(id) {
+      var sel = document.getElementById(id);
+      sel.innerHTML = ESTADOS_BR.map(function(uf) {
+        var selected = (uf[0] === 'ES') ? ' selected' : '';
+        return '<option value="' + uf[0] + '"' + selected + '>' + uf[0] + ' — ' + uf[1] + '</option>';
+      }).join('');
+    });
+    carregarCidades('reg-uf', 'reg-municipio', '3205309');
+    carregarCidades('sn-uf', 'sn-municipio', '3205309');
+    carregarCidades('df-uf', 'df-mun', '3205309');
+  }
+
+  async function carregarCidades(idUf, idCidade, codigoPadrao) {
+    var uf = document.getElementById(idUf).value;
+    var selCidade = document.getElementById(idCidade);
+    selCidade.innerHTML = '<option value="">Carregando municípios...</option>';
+    try {
+      var resp = await fetch('https://ibge.gov.br' + uf + '/municipios?orderBy=nome');
+      var lista = await resp.json();
+      selCidade.innerHTML = lista.map(function(m) {
+        var selected = (codigoPadrao && String(m.id) === String(codigoPadrao)) ? ' selected' : '';
+        return '<option value="' + m.id + '"' + selected + '>' + m.nome + '</option>';
+      }).join('');
+    } catch (e) {
+      selCidade.innerHTML = '<option value="3205309">Vitória (3205309)</option>';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', preencherUFs);
+
   function abrirAba(nome) {
-    document.getElementById('aba-regular').style.display = 'none';
-    document.getElementById('aba-simples').style.display = 'none';
-    document.getElementById('aba-danfse').style.display = 'none';
-    document.getElementById('btn-regular').classList.remove('active');
-    document.getElementById('btn-simples').classList.remove('active');
-    document.getElementById('btn-danfse').classList.remove('active');
-    document.getElementById('aba-' + nome).style.display = 'block';
-    document.getElementById('btn-' + nome).classList.add('active');
+    ['regular', 'simples', 'danfse'].forEach(function(aba) {
+      document.getElementById('aba-' + aba).style.display = (aba === nome) ? 'block' : 'none';
+      document.getElementById('btn-' + aba).classList.toggle('active', aba === nome);
+    });
   }
   function formatBRL(val) {
     return Number(val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -316,7 +353,7 @@
     var payload = {
       dataHoraEmissao: document.getElementById('reg-data').value + "T10:00:00-03:00",
       municipio: Number(document.getElementById('reg-municipio').value),
-      uf: document.getElementById('reg-uf').value.toUpperCase(),
+      uf: document.getElementById('reg-uf').value,
       itens: [{ numero: 1, ncm: document.getElementById('reg-ncm').value, cst: document.getElementById('reg-cst').value, cClassTrib: document.getElementById('reg-cclasstrib').value, baseCalculo: valorOp }]
     };
     var resp = await fetch("/api/calcular/regime-geral", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
@@ -334,7 +371,7 @@
     box.style.display = 'block';
     kpi.innerHTML = '<div class="kpi-card"><small>Status</small><strong>Calculando...</strong></div>';
     var valorOp = Number(document.getElementById('sn-valor').value);
-    var payload = { anexo: document.getElementById('sn-anexo').value, faixa: document.getElementById('sn-faixa').value, municipio: Number(document.getElementById('sn-municipio').value), uf: document.getElementById('sn-uf').value.toUpperCase(), itens: [{ numero: 1, valor: valorOp }] };
+    var payload = { anexo: document.getElementById('sn-anexo').value, faixa: document.getElementById('sn-faixa').value, municipio: Number(document.getElementById('sn-municipio').value), uf: document.getElementById('sn-uf').value, itens: [{ numero: 1, valor: valorOp }] };
     var resp = await fetch("/api/calcular/simples-nacional", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     var data = await resp.json();
     kpi.innerHTML =
@@ -357,7 +394,9 @@
     if (resp.ok) baixarBlobPDF(await resp.blob());
   }
   async function gerarDanfseFormulario() {
-    var payload = { prestador_nome: document.getElementById('df-prest-nome').value, prestador_doc: document.getElementById('df-prest-doc').value, tomador_nome: document.getElementById('df-tom-nome').value, tomador_doc: document.getElementById('df-tom-doc').value, municipio: document.getElementById('df-mun').value, valor: Number(document.getElementById('df-valor').value), descricao: document.getElementById('df-desc').value };
+    var selMun = document.getElementById('df-mun');
+    var nomeCidade = selMun.options[selMun.selectedIndex].text + " - " + document.getElementById('df-uf').value + " (" + selMun.value + ")";
+    var payload = { prestador_nome: document.getElementById('df-prest-nome').value, prestador_doc: document.getElementById('df-prest-doc').value, tomador_nome: document.getElementById('df-tom-nome').value, tomador_doc: document.getElementById('df-tom-doc').value, municipio: nomeCidade, valor: Number(document.getElementById('df-valor').value), descricao: document.getElementById('df-desc').value };
     var resp = await fetch("/api/gerar/danfse", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     if (resp.ok) baixarBlobPDF(await resp.blob());
   }
@@ -370,3 +409,4 @@
 </script>
 </body>
 </html>
+
