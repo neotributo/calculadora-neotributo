@@ -223,3 +223,92 @@
     document.getElementById('aba-' + nome).style.display = 'block';
     document.getElementById('btn-' + nome).classList.add('active');
   }
+  function formatBRL(val) {
+    return Number(val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+  async function simularRegimeGeral() {
+    var box = document.getElementById('res-regular');
+    var kpi = document.getElementById('kpi-regular');
+    var out = document.getElementById('json-regular');
+    box.style.display = 'block';
+    kpi.innerHTML = '<div class="kpi-card"><small>Status</small><strong>Calculando...</strong></div>';
+    var valorOp = Number(document.getElementById('reg-valor').value);
+    var payload = {
+      id: "SIM-NEOTRIBUTO-01",
+      versao: "1.0.0",
+      dataHoraEmissao: document.getElementById('reg-data').value + "T10:00:00-03:00",
+      municipio: Number(document.getElementById('reg-municipio').value),
+      uf: document.getElementById('reg-uf').value.toUpperCase(),
+      itens: [{
+        numero: 1,
+        ncm: document.getElementById('reg-ncm').value,
+        cst: document.getElementById('reg-cst').value,
+        cClassTrib: document.getElementById('reg-cclasstrib').value,
+        baseCalculo: valorOp,
+        quantidade: 1,
+        unidade: "UN"
+      }]
+    };
+    try {
+      var resp = await fetch("/api/calcular/regime-geral", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      var data = await resp.json();
+      out.textContent = JSON.stringify(data, null, 2);
+      var tot = (data && data.total) ? data.total : {};
+      var vCBS = tot.vCBS || 0;
+      var vIBS = (tot.vIBSUF || 0) + (tot.vIBSMun || 0);
+      var vIS = tot.vIS || 0;
+      kpi.innerHTML =
+        '<div class="kpi-card"><small>Base de Cálculo</small><strong>' + formatBRL(valorOp) + '</strong></div>' +
+        '<div class="kpi-card"><small>CBS (Federal)</small><strong>' + formatBRL(vCBS) + '</strong></div>' +
+        '<div class="kpi-card"><small>IBS (Estadual + Municipal)</small><strong>' + formatBRL(vIBS) + '</strong></div>' +
+        '<div class="kpi-card"><small>Imposto Seletivo (IS)</small><strong>' + formatBRL(vIS) + '</strong></div>';
+    } catch (err) {
+      kpi.innerHTML = '';
+      out.textContent = "Erro ao calcular: " + err.message;
+    }
+  }
+  async function simularSimples() {
+    var out = document.getElementById('json-simples');
+    document.getElementById('res-simples').style.display = 'block';
+    var payload = {
+      dataHoraEmissao: document.getElementById('sn-data').value + "T10:00:00-03:00",
+      municipio: Number(document.getElementById('sn-municipio').value),
+      uf: document.getElementById('sn-uf').value.toUpperCase(),
+      itens: [{ numero: 1, valor: Number(document.getElementById('sn-valor').value) }]
+    };
+    try {
+      var resp = await fetch("/api/calcular/simples-nacional", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      out.textContent = JSON.stringify(await resp.json(), null, 2);
+    } catch (err) {
+      out.textContent = "Erro ao calcular: " + err.message;
+    }
+  }
+  async function gerarDanfsePDF() {
+    var xml = document.getElementById('danfse-xml').value.trim();
+    if (!xml) { alert("Cole um XML válido."); return; }
+    try {
+      var resp = await fetch("/api/gerar/danfse", {
+        method: "POST",
+        headers: { "Content-Type": "application/xml" },
+        body: xml
+      });
+      if (!resp.ok) throw new Error("Status " + resp.status);
+      var link = document.createElement('a');
+      link.href = URL.createObjectURL(await resp.blob());
+      link.download = "DANFSe-NEOTRIBUTO.pdf";
+      link.click();
+    } catch (err) {
+      alert("Erro ao gerar PDF: " + err.message);
+    }
+  }
+</script>
+</body>
+</html>
