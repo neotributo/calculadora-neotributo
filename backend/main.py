@@ -1,4 +1,6 @@
 import io
+import json
+import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from fastapi import FastAPI, Request
@@ -10,6 +12,25 @@ from reportlab.lib import colors
 
 app = FastAPI(title="NEOTRIBUTO - Calculadora Reforma Tributaria")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+CACHE_MUNICIPIOS = {}
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
+@app.get("/api/municipios/{uf}")
+async def listar_municipios(uf: str):
+    sigla = uf.strip().upper()[:2]
+    if sigla in CACHE_MUNICIPIOS:
+        return JSONResponse(CACHE_MUNICIPIOS[sigla])
+        url = f"https://ibge.gov.br{sigla}/municipios?orderBy=nome"
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        dados = json.loads(resp.read().decode("utf-8"))
+    lista = [{"id": m["id"], "nome": m["nome"]} for m in dados]
+    CACHE_MUNICIPIOS[sigla] = lista
+    return JSONResponse(lista)
 
 ALIQUOTAS_ANO = {
     2026: {"cbs": 0.009, "ibs_uf": 0.001, "ibs_mun": 0.000},
