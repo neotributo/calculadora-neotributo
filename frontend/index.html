@@ -77,7 +77,15 @@
       border-bottom: 1px solid var(--border);
       padding-bottom: 0.8rem;
     }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.2rem; margin: 1.5rem 0; }
+    .section-box {
+      background: #F8FAFC;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.3rem;
+      margin-bottom: 1.3rem;
+    }
+    .section-box h3 { margin: 0 0 0.9rem 0; font-size: 1rem; color: var(--navy); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.2rem; margin: 1.2rem 0; }
     label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--slate); }
     input, select, textarea {
       width: 100%;
@@ -107,6 +115,17 @@
       color: #fff;
       transform: translateY(-1px);
     }
+    .btn-secondary {
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      padding: 0.85rem 1.5rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+    }
+    .btn-secondary:hover { background: var(--slate); }
     .result-box {
       margin-top: 2rem;
       background: var(--navy);
@@ -169,9 +188,10 @@
   <div class="tabs">
     <button type="button" id="btn-regular" class="tab-btn active" onclick="abrirAba('regular')">1. Regime Regular (Lucro Real / Presumido)</button>
     <button type="button" id="btn-simples" class="tab-btn" onclick="abrirAba('simples')">2. Simples Nacional</button>
-    <button type="button" id="btn-danfse" class="tab-btn" onclick="abrirAba('danfse')">3. Gerador DANFSe (XML → PDF)</button>
+    <button type="button" id="btn-danfse" class="tab-btn" onclick="abrirAba('danfse')">3. Gerador DANFSe (PDF)</button>
   </div>
 
+  <!-- ABA 1: REGIME REGULAR -->
   <div id="aba-regular" class="card">
     <h2>Simulação Regime Geral (CBS / IBS / IS)</h2>
     <div class="grid">
@@ -202,132 +222,23 @@
     </div>
   </div>
 
+  <!-- ABA 2: SIMPLES NACIONAL -->
   <div id="aba-simples" class="card" style="display:none;">
     <h2>Simulação Simples Nacional (CBS / IBS)</h2>
     <div class="grid">
-      <div><label>Data da Operação</label><input type="date" id="sn-data" value="2027-01-15"></div>
-      <div><label>Município IBGE</label><input type="number" id="sn-municipio" value="3205309"></div>
-      <div><label>UF</label><input type="text" id="sn-uf" value="ES" maxlength="2"></div>
-      <div><label>Valor da Operação (R$)</label><input type="number" id="sn-valor" value="5000.00" step="0.01"></div>
-    </div>
-    <button type="button" class="btn-primary" onclick="simularSimples()">Calcular Simples Nacional</button>
-    <div id="res-simples" class="result-box">
-      <h3>Demonstrativo da Operação — Simples Nacional (DAS)</h3>
-      <div class="kpi-grid" id="kpi-simples"></div>
-      <div class="cta-banner">
-        <div><strong>Avalie se o recolhimento por fora do DAS gera <span>mais créditos para seus clientes B2B</span>.</strong><br><small style="color:#CBD5E1;">Simule o melhor enquadramento com os consultores da NEOTRIBUTO.</small></div>
-        <a href="https://neotributo.com.br" target="_blank">Agendar Análise Gratuita</a>
+      <div>
+        <label>Anexo do Simples Nacional</label>
+        <select id="sn-anexo">
+          <option value="I">Anexo I — Comércio</option>
+          <option value="II">Anexo II — Indústria</option>
+          <option value="III" selected>Anexo III — Serviços (Receitas de Locação, Manutenção, etc.)</option>
+          <option value="IV">Anexo IV — Serviços (Construção, Vigilância, Limpeza, etc.)</option>
+          <option value="V">Anexo V — Serviços (Consultoria, TI, Engenharia, etc.)</option>
+        </select>
       </div>
-    </div>
-  </div>
-
-  <div id="aba-danfse" class="card" style="display:none;">
-    <h2>Gerador de DANFSe em PDF</h2>
-    <label>Cole o conteúdo XML da NFS-e abaixo:</label>
-    <textarea id="danfse-xml" rows="8" placeholder="<NFSe>...</NFSe>"></textarea><br><br>
-    <button type="button" class="btn-primary" onclick="gerarDanfsePDF()">Gerar e Baixar PDF</button>
-  </div>
-</div>
-
-<script>
-  function abrirAba(nome) {
-    document.getElementById('aba-regular').style.display = 'none';
-    document.getElementById('aba-simples').style.display = 'none';
-    document.getElementById('aba-danfse').style.display = 'none';
-    document.getElementById('btn-regular').classList.remove('active');
-    document.getElementById('btn-simples').classList.remove('active');
-    document.getElementById('btn-danfse').classList.remove('active');
-    document.getElementById('aba-' + nome).style.display = 'block';
-    document.getElementById('btn-' + nome).classList.add('active');
-  }
-  function formatBRL(val) {
-    return Number(val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  }
-  async function simularRegimeGeral() {
-    var box = document.getElementById('res-regular');
-    var kpi = document.getElementById('kpi-regular');
-    box.style.display = 'block';
-    kpi.innerHTML = '<div class="kpi-card"><small>Status</small><strong>Calculando...</strong></div>';
-    var valorOp = Number(document.getElementById('reg-valor').value);
-    var payload = {
-      dataHoraEmissao: document.getElementById('reg-data').value + "T10:00:00-03:00",
-      municipio: Number(document.getElementById('reg-municipio').value),
-      uf: document.getElementById('reg-uf').value.toUpperCase(),
-      itens: [{
-        numero: 1,
-        ncm: document.getElementById('reg-ncm').value,
-        cst: document.getElementById('reg-cst').value,
-        cClassTrib: document.getElementById('reg-cclasstrib').value,
-        baseCalculo: valorOp
-      }]
-    };
-    try {
-      var resp = await fetch("/api/calcular/regime-geral", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      var data = await resp.json();
-      var tot = data.total || {};
-      var vCBS = tot.vCBS || 0;
-      var vIBS = (tot.vIBSUF || 0) + (tot.vIBSMun || 0);
-      var vIS = tot.vIS || 0;
-      kpi.innerHTML =
-        '<div class="kpi-card"><small>Base de Cálculo</small><strong>' + formatBRL(valorOp) + '</strong></div>' +
-        '<div class="kpi-card"><small>CBS (Federal)</small><strong>' + formatBRL(vCBS) + '</strong></div>' +
-        '<div class="kpi-card"><small>IBS (Estadual + Municipal)</small><strong>' + formatBRL(vIBS) + '</strong></div>' +
-        '<div class="kpi-card"><small>Imposto Seletivo (IS)</small><strong>' + formatBRL(vIS) + '</strong></div>';
-    } catch (err) {
-      kpi.innerHTML = '<div class="kpi-card"><small>Aviso</small><strong>Aguardando sincronização do servidor</strong></div>';
-    }
-  }
-  async function simularSimples() {
-    var box = document.getElementById('res-simples');
-    var kpi = document.getElementById('kpi-simples');
-    box.style.display = 'block';
-    kpi.innerHTML = '<div class="kpi-card"><small>Status</small><strong>Calculando...</strong></div>';
-    var valorOp = Number(document.getElementById('sn-valor').value);
-    var payload = {
-      dataHoraEmissao: document.getElementById('sn-data').value + "T10:00:00-03:00",
-      municipio: Number(document.getElementById('sn-municipio').value),
-      uf: document.getElementById('sn-uf').value.toUpperCase(),
-      itens: [{ numero: 1, valor: valorOp }]
-    };
-    try {
-      var resp = await fetch("/api/calcular/simples-nacional", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      var data = await resp.json();
-      kpi.innerHTML =
-        '<div class="kpi-card"><small>Valor da Operação</small><strong>' + formatBRL(valorOp) + '</strong></div>' +
-        '<div class="kpi-card"><small>Parcela CBS (DAS)</small><strong>' + formatBRL(data.parcelaCBS_DAS) + '</strong></div>' +
-        '<div class="kpi-card"><small>Parcela IBS (DAS)</small><strong>' + formatBRL(data.parcelaIBS_DAS) + '</strong></div>' +
-        '<div class="kpi-card"><small>Total CBS + IBS no DAS</small><strong>' + formatBRL(data.totalCBS_IBS) + '</strong></div>';
-    } catch (err) {
-      kpi.innerHTML = '<div class="kpi-card"><small>Aviso</small><strong>Aguardando sincronização do servidor</strong></div>';
-    }
-  }
-  async function gerarDanfsePDF() {
-    var xml = document.getElementById('danfse-xml').value.trim();
-    if (!xml) { alert("Cole um XML válido."); return; }
-    try {
-      var resp = await fetch("/api/gerar/danfse", {
-        method: "POST",
-        headers: { "Content-Type": "application/xml" },
-        body: xml
-      });
-      if (!resp.ok) throw new Error("Status " + resp.status);
-      var link = document.createElement('a');
-      link.href = URL.createObjectURL(await resp.blob());
-      link.download = "DANFSe-NEOTRIBUTO.pdf";
-      link.click();
-    } catch (err) {
-      alert("Não foi possível gerar o PDF agora.");
-    }
-  }
-</script>
-</body>
-</html>
-
+      <div>
+        <label>Faixa de Receita Bruta (RBT12)</label>
+        <select id="sn-faixa">
+          <option value="faixa1">1ª Faixa — Até R$ 180.000,00</option>
+          <option value="faixa2" selected>2ª Faixa — De R$ 180.000,01 a R$ 360.000,00</option>
+          <option value="faixa3">3ª Faixa — De R$ 360.000,01 a R$ 720.000,00</option>
