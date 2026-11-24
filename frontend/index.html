@@ -322,7 +322,7 @@
     var selCidade = document.getElementById(idCidade);
     selCidade.innerHTML = '<option value="">Carregando municípios...</option>';
     try {
-      var resp = await fetch('https://ibge.gov.br' + uf + '/municipios?orderBy=nome');
+      var resp = await fetch('/api/municipios/' + uf);
       var lista = await resp.json();
       selCidade.innerHTML = lista.map(function(m) {
         var selected = (codigoPadrao && String(m.id) === String(codigoPadrao)) ? ' selected' : '';
